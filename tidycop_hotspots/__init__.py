@@ -12,7 +12,7 @@ model       HotspotForest / HotspotClassifier wrappers around scikit-learn
 validate    PAI, hit rate curves, surveillance plots, model reports
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from tidycop_hotspots.grid import (
     make_grid,
@@ -38,6 +38,10 @@ from tidycop_hotspots.validate import (
     recapture_rate,
     model_report,
 )
+from tidycop_hotspots.integrations import (
+    from_tidycop,
+    HotspotBundle,
+)
 
 __all__ = [
     # grid
@@ -60,4 +64,7 @@ __all__ = [
     "hit_rate_curve",
     "recapture_rate",
     "model_report",
+    # integrations
+    "from_tidycop",
+    "HotspotBundle",
 ]
