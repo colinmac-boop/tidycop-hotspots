@@ -27,7 +27,37 @@ pip install tidycop-hotspots
 pip install "tidycop-hotspots[all]"
 ```
 
-## Quick Start
+## Quick Start (one-call helper)
+
+As of v0.1.1, the fastest path from a tidycop DataFrame to a trained
+model is via `from_tidycop()`:
+
+```python
+import tidycop
+import tidycop_hotspots as th
+
+# 1. Pull crime data
+incidents = tidycop.get_incidents("chicago", "2025-01-01", "2026-06-30")
+
+# 2. One-call: grid + features + train/test split
+bundle = th.from_tidycop(
+    incidents,
+    train_end="2026-03-31",   # everything after is held out
+    cell_size_m=250,
+    bandwidth_m=500,
+)
+
+# 3. Train
+model = th.HotspotForest(n_estimators=400, min_samples_leaf=5)
+model.fit(bundle.features, bundle.y_train)
+
+# 4. Evaluate on the held-out test window
+pred = model.predict(bundle.features)
+pai = th.predictive_accuracy_index(bundle.y_test, pred, area_pct=0.10)
+print(f"PAI@10%: {pai:.2f}")
+```
+
+## Quick Start (manual, more control)
 
 ```python
 import tidycop
@@ -61,6 +91,15 @@ future_grid = th.aggregate_from_df(grid, future_crimes, count_col="future_count"
 report = th.model_report(model.predict(features), future_grid["future_count"])
 print(f"PAI@5%: {report['pai_0.05']:.2f}")
 ```
+
+## Live production use
+
+The [CityCrimeMap](https://citycrimemap.us) frontend consumes this
+package. See `web/scripts/predict_hotspots.py` in the
+[tidycop repo](https://github.com/colinmac-boop/tidycop) for a real
+end-to-end pipeline (tidycop → tidycop-hotspots → GeoJSON → Leaflet
+overlay). Chicago's page was the first to ship a Predicted-risk
+layer, 2026-07-03.
 
 ## CLI
 
